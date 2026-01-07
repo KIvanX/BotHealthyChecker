@@ -1,9 +1,12 @@
 import asyncio
 import logging
+import os
+from datetime import datetime
 
 from aiogram import types, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
+from aiogram.types import FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from core.checker import checker
@@ -22,6 +25,16 @@ async def on_start():
 async def on_shutdown():
     await tg_client.disconnect()
     await bot.session.close()
+
+
+@dp.message(Command('logs'))
+async def get_logs(message: types.Message):
+    if str(message.chat.id) in os.environ.get('ADMINS', '').split(','):
+        await delete_message(message)
+        await bot.send_document(message.chat.id, FSInputFile('logs.log'), reply_markup=ok_button_keyboard())
+
+        with open('logs.log', 'w') as file:
+            file.write(str(datetime.now()) + '\n')
 
 
 @dp.callback_query(F.data == 'start')

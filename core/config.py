@@ -1,4 +1,6 @@
 import json
+import logging
+import sys
 import os
 
 import dotenv
@@ -27,3 +29,15 @@ tg_client = TelegramClient(session='tg_session',
 
 with open('users.json', 'r', encoding='utf-8') as f1:
     users = json.load(f1)
+
+
+logging.root.handlers.clear()
+logging.basicConfig(
+    level=logging.WARNING,
+    format="%(asctime)s %(levelname)s %(message)s\n" + '_' * 100,
+    handlers=[
+        logging.FileHandler("logs.log", mode="a", encoding="utf-8"),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+

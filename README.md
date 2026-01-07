@@ -35,6 +35,7 @@ pip install -r requirements.txt
 TOKEN=
 TELETHON_API_ID=
 TELETHON_API_HASH=
+ADMINS=
 ```
 
 #### 4. Start bot

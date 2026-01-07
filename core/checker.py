@@ -6,11 +6,11 @@ from core.tg_client import ping_bot
 
 
 async def checker():
+    await asyncio.sleep(10)
     while True:
-        try:
-            await asyncio.sleep(60)
-            for user_id in users:
-                for user_bot in users[user_id]['bots']:
+        for user_id in users:
+            for user_bot in users[user_id].get('bots', []):
+                try:
                     if user_bot['status'] == 'stop':
                         continue
 
@@ -20,6 +20,7 @@ async def checker():
                                                text=f'❗️ Бот <a href="https://t.me/{user_bot["username"]}">'
                                                     f'{user_bot['name']}</a> перестал отвечать на команду /start')
                     await asyncio.sleep(1)
-        except Exception as e:
-            logging.error(e, exc_info=True)
-            await asyncio.sleep(60)
+                except Exception as e:
+                    logging.error(e, exc_info=True)
+
+        await asyncio.sleep(60)
