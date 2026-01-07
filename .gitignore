@@ -1,0 +1,5 @@
+.idea
+.venv
+.env
+users.json
+tg_session.session
