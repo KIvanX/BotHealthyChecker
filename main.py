@@ -6,10 +6,10 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from checker import checker
-from config import bot, dp, tg_client, AddBotStates, users
-from tg_client import get_bot, ping_bot
-from utils import ok_button_keyboard, save_users, delete_message
+from core.checker import checker
+from core.config import bot, dp, tg_client, AddBotStates, users
+from core.tg_client import get_bot, ping_bot
+from core.utils import ok_button_keyboard, save_users, delete_message
 
 
 @dp.startup()
