@@ -52,7 +52,7 @@ async def add_bot(call: types.CallbackQuery, state: FSMContext):
     keyboard.add(types.InlineKeyboardButton(text='🏠 Назад', callback_data='start'))
 
     await state.set_state(AddBotStates.bot_username)
-    await call.message.edit_text('✏️ Введи <code>username</code> бота, за работой которого нужно следить.',
+    await call.message.edit_text('✏️ Введи <code>username</code> своего бота, я сообщу если он перестанет работать.',
                                  reply_markup=keyboard.as_markup())
 
 

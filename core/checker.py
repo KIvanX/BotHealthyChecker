@@ -11,7 +11,7 @@ async def checker():
             await asyncio.sleep(60)
             for user_id in users:
                 for user_bot in users[user_id]['bots']:
-                    if user_bot['status'] != 'stop':
+                    if user_bot['status'] == 'stop':
                         continue
 
                     answer = await ping_bot(user_bot['username'])
