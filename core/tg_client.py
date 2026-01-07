@@ -4,7 +4,7 @@ import time
 from telethon import events
 from telethon.tl import types
 
-from config import tg_client
+from core.config import tg_client
 
 
 async def get_bot(username: str):

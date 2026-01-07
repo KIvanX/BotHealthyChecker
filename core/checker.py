@@ -1,8 +1,8 @@
 import asyncio
 import logging
 
-from config import users, bot
-from tg_client import ping_bot
+from core.config import users, bot
+from core.tg_client import ping_bot
 
 
 async def checker():

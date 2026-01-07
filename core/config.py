@@ -25,5 +25,5 @@ tg_client = TelegramClient(session='tg_session',
                            lang_code="en",
                            system_lang_code="en-US")
 
-with open('../users.json', 'r', encoding='utf-8') as f1:
+with open('users.json', 'r', encoding='utf-8') as f1:
     users = json.load(f1)

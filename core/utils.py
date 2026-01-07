@@ -5,7 +5,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 
 def save_users(new_users: dict):
-    with open('../users.json', 'w', encoding='utf-8') as f2:
+    with open('users.json', 'w', encoding='utf-8') as f2:
         f2.write(json.dumps(new_users, ensure_ascii=False, indent=4))
 
 
