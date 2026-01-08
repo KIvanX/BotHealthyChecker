@@ -23,6 +23,7 @@ async def ping_bot(username: str, timeout=10):
 
     @tg_client.on(events.NewMessage(from_users=bot.id))
     async def handler(event):
+        await event.mark_read()
         response_message["text"] = event.message.text
         response_event.set()
 

@@ -112,15 +112,15 @@ async def bot_menu(call: types.CallbackQuery, state: FSMContext):
     status_text = '💤 Остановить отслеживание' if user_bot['status'] == 'start' else '🆙 Запустить отслеживание'
     keyboard = InlineKeyboardBuilder()
     keyboard.row(types.InlineKeyboardButton(text=status_text, callback_data='switch_status_bot'))
-    keyboard.row(types.InlineKeyboardButton(text='🗑 Удалить', callback_data='delete_bot'))
+    keyboard.row(types.InlineKeyboardButton(text='🗑 Удалить', callback_data='delete_bot_confirm'))
     keyboard.row(types.InlineKeyboardButton(text='🏠 Назад', callback_data='start'))
 
 
     answer = await ping_bot(user_bot['username'], timeout=3)
     text = (f'🤖 Бот <b>{user_bot['name']}</b>\n\n'
             f'Чат: @{user_bot["username"]}\n'
-            f'Отслеживание работы: {"🆙 Запущено" if user_bot["status"] == "start" else "💤 Остановлено"}\n'
-            f'Состояние: {"🟢 Работает" if answer["status"] == 'ok' else "🔴 Не отвечает"}\n')
+            f'Отслеживание работы: <b>{"🆙 Запущено" if user_bot["status"] == "start" else "💤 Остановлено"}</b>\n'
+            f'Состояние: <b>{"🟢 Работает" if answer["status"] == 'ok' else "🔴 Не отвечает"}</b>\n')
 
     if answer['status'] == 'ok':
         response_text = answer["response_text"][:50] + '...' if len(answer["response_text"]) > 50 else answer["response_text"]
@@ -129,6 +129,18 @@ async def bot_menu(call: types.CallbackQuery, state: FSMContext):
 
     await state.update_data(username=user_bot['username'])
     await call.message.edit_text(text, reply_markup=keyboard.as_markup())
+
+
+@dp.callback_query(F.data == 'delete_bot_confirm')
+async def delete_bot_confirm(call: types.CallbackQuery, state: FSMContext):
+    state_data = await state.get_data()
+
+    keyboard = InlineKeyboardBuilder()
+    keyboard.row(types.InlineKeyboardButton(text='✅ Подтвердить', callback_data='delete_bot'))
+    keyboard.row(types.InlineKeyboardButton(text='🏠 Назад', callback_data='bot_' + state_data['username']))
+
+    await call.message.edit_text(f'❕ Подтверди удаление бота @{state_data['username']} из отслеживаемых',
+                                 reply_markup=keyboard.as_markup())
 
 
 @dp.callback_query(F.data == 'delete_bot')
