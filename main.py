@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import time
 from datetime import datetime
 
 from aiogram import types, F
@@ -10,7 +11,7 @@ from aiogram.types import FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from core.checker import checker
-from core.config import bot, dp, tg_client, AddBotStates, users
+from core.config import bot, dp, tg_client, BotStates, users
 from core.tg_client import get_bot, ping_bot
 from core.utils import ok_button_keyboard, save_users, delete_message
 
@@ -64,12 +65,12 @@ async def add_bot(call: types.CallbackQuery, state: FSMContext):
     keyboard = InlineKeyboardBuilder()
     keyboard.add(types.InlineKeyboardButton(text='🏠 Назад', callback_data='start'))
 
-    await state.set_state(AddBotStates.bot_username)
+    await state.set_state(BotStates.bot_username)
     await call.message.edit_text('✏️ Введи <code>username</code> своего бота, я сообщу если он перестанет работать.',
                                  reply_markup=keyboard.as_markup())
 
 
-@dp.message(F.text[0] != '/', AddBotStates.bot_username)
+@dp.message(F.text[0] != '/', BotStates.bot_username)
 async def save_new_bot(message: types.Message):
     username = message.text.replace('@', '').replace('https://t.me/', '')
     bot_info = await get_bot(username)
@@ -93,33 +94,36 @@ async def save_new_bot(message: types.Message):
                              reply_markup=ok_button_keyboard())
         return 0
 
-    users[str(message.chat.id)]['bots'].append({'id': bot_info.id, 'username': username,
-                                                'name': bot_info.first_name, 'status': 'start'})
+    users[str(message.chat.id)]['bots'].append({'id': bot_info.id, 'username': username, 'name': bot_info.first_name,
+                                                'status': 'start', 'period': answer['period']})
     save_users(users)
 
     await start(message)
 
 
 @dp.callback_query(F.data.startswith('bot_'))
-async def bot_menu(call: types.CallbackQuery, state: FSMContext):
-    if call.data.startswith('bot_'):
-        user_bot = next((b for b in users[str(call.message.chat.id)]['bots'] if b['username'] == call.data[4:]), None)
+async def bot_menu(data, state: FSMContext):
+    message: types.Message = data.message if isinstance(data, types.CallbackQuery) else data
+    state_data = await state.get_data()
+    if isinstance(data, types.CallbackQuery) and data.data.startswith('bot_'):
+        user_bot = next((b for b in users[str(message.chat.id)]['bots'] if b['username'] == data.data[4:]), None)
     else:
-        state_data = await state.get_data()
-        user_bot = next((b for i, b in enumerate(users[str(call.message.chat.id)]['bots'])
+        user_bot = next((b for i, b in enumerate(users[str(message.chat.id)]['bots'])
                          if b['username'] == state_data['username']), None)
 
     status_text = '💤 Остановить отслеживание' if user_bot['status'] == 'start' else '🆙 Запустить отслеживание'
     keyboard = InlineKeyboardBuilder()
-    keyboard.row(types.InlineKeyboardButton(text=status_text, callback_data='switch_status_bot'))
-    keyboard.row(types.InlineKeyboardButton(text='🗑 Удалить', callback_data='delete_bot_confirm'))
-    keyboard.row(types.InlineKeyboardButton(text='🏠 Назад', callback_data='start'))
-
+    keyboard.add(types.InlineKeyboardButton(text=status_text, callback_data='switch_status_bot'))
+    keyboard.add(types.InlineKeyboardButton(text='🔁 Изменить период опроса', callback_data='update_period'))
+    keyboard.add(types.InlineKeyboardButton(text='🗑 Удалить', callback_data='delete_bot_confirm'))
+    keyboard.add(types.InlineKeyboardButton(text='🏠 Назад', callback_data='start'))
+    keyboard.adjust(1, 1, 2)
 
     answer = await ping_bot(user_bot['username'], timeout=3)
     text = (f'🤖 Бот <b>{user_bot['name']}</b>\n\n'
             f'Чат: @{user_bot["username"]}\n'
             f'Отслеживание работы: <b>{"🆙 Запущено" if user_bot["status"] == "start" else "💤 Остановлено"}</b>\n'
+            f'Период опроса: <b>{user_bot["period"]} мин</b>\n'
             f'Состояние: <b>{"🟢 Работает" if answer["status"] == 'ok' else "🔴 Не отвечает"}</b>\n')
 
     if answer['status'] == 'ok':
@@ -128,7 +132,9 @@ async def bot_menu(call: types.CallbackQuery, state: FSMContext):
                  f'Ответ на команду <code>start</code>:\n{response_text}\n')
 
     await state.update_data(username=user_bot['username'])
-    await call.message.edit_text(text, reply_markup=keyboard.as_markup())
+    await bot.edit_message_text(text, chat_id=message.chat.id,
+                                message_id=state_data.get('message_id', message.message_id),
+                                reply_markup=keyboard.as_markup())
 
 
 @dp.callback_query(F.data == 'delete_bot_confirm')
@@ -141,6 +147,34 @@ async def delete_bot_confirm(call: types.CallbackQuery, state: FSMContext):
 
     await call.message.edit_text(f'❕ Подтверди удаление бота @{state_data['username']} из отслеживаемых',
                                  reply_markup=keyboard.as_markup())
+
+
+@dp.callback_query(F.data == 'update_period')
+async def update_period(call: types.CallbackQuery, state: FSMContext):
+    state_data = await state.get_data()
+
+    await state.set_state(BotStates.bot_period)
+    await state.update_data(message_id=call.message.message_id)
+
+    keyboard = InlineKeyboardBuilder()
+    keyboard.row(types.InlineKeyboardButton(text='🏠 Назад', callback_data='bot_' + state_data['username']))
+
+    await call.message.edit_text('✏️ Введи новый период опроса бота минутах', reply_markup=keyboard.as_markup())
+
+
+@dp.message(F.text[0] != '/', BotStates.bot_period)
+async def save_period(message: types.Message, state: FSMContext):
+    state_data = await state.get_data()
+    await delete_message(message)
+    if not message.text.isdigit():
+        return await message.answer('⚠️ Период задается одним целым числом', reply_markup=ok_button_keyboard())
+
+    user_bot = next((b for i, b in enumerate(users[str(message.chat.id)]['bots'])
+                     if b['username'] == state_data['username']), None)
+    user_bot['period'] = int(message.text)
+    save_users(users)
+
+    await bot_menu(message, state)
 
 
 @dp.callback_query(F.data == 'delete_bot')

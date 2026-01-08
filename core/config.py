@@ -11,8 +11,9 @@ from telethon import TelegramClient
 from aiogram.fsm.state import StatesGroup, State
 
 
-class AddBotStates(StatesGroup):
+class BotStates(StatesGroup):
     bot_username = State()
+    bot_period = State()
 
 
 dotenv.load_dotenv()
