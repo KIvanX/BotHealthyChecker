@@ -17,8 +17,8 @@ async def checker():
 
                     answer = await ping_bot(user_bot['username'])
                     if answer['status'] != 'ok':
+                        logging.error(f'Error bot ping status: {answer}')
                         if answer.get('error', '') == 'some error':
-                            logging.error(f'Error bot ping status: {answer}')
                             await tg_client.log_out()
                             await asyncio.sleep(5)
                             await tg_client.start()
