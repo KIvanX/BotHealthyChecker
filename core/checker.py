@@ -4,6 +4,7 @@ import random
 
 from core.config import users, bot, tg_client
 from core.tg_client import ping_bot
+from core.utils import restart_tg_client
 
 
 async def checker():
@@ -19,9 +20,7 @@ async def checker():
                     if answer['status'] != 'ok':
                         logging.error(f'Error bot ping status: {answer}')
                         if answer.get('error', '').startswith('A wait of'):
-                            await tg_client.log_out()
-                            await asyncio.sleep(5)
-                            await tg_client.start()
+                            await restart_tg_client(tg_client)
                             continue
 
                         await bot.send_message(chat_id=user_id,

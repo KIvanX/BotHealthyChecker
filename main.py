@@ -53,7 +53,7 @@ async def start(data):
     keyboard.row(types.InlineKeyboardButton(text='➕ Добавить бота', callback_data='add_bot'))
 
     send_message = message.edit_text if isinstance(data, types.CallbackQuery) else message.answer
-    await send_message('💊 <b>Привет!</b> Я помогу тебе следить за состоянием любого <i>telegram</i> бота.\n\n'
+    await send_message('🩺 <b>Привет!</b> Я помогу тебе следить за состоянием любого <i>telegram</i> бота.\n\n'
                        'Добавь в список ботов, за работой которых нужно следить. '
                        'В случае если бот перестанет отвечать, я отправлю тебе уведомление.',
                        reply_markup=keyboard.as_markup())

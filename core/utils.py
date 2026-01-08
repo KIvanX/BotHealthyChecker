@@ -1,7 +1,10 @@
+import asyncio
 import json
+import os
 
 from aiogram import types
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from telethon import TelegramClient
 
 
 def save_users(new_users: dict):
@@ -21,3 +24,17 @@ async def delete_message(data):
         await message.delete()
     except Exception:
         pass
+
+async def restart_tg_client(tg_client):
+    await tg_client.disconnect()
+    await asyncio.sleep(5)
+    tg_client = TelegramClient(session='tg_session',
+                               api_id=int(os.environ['TELETHON_API_ID']),
+                               api_hash=os.environ['TELETHON_API_HASH'],
+                               device_model="iPhone 13 Pro Max",
+                               system_version='4.16.30-vxCUSTOM',
+                               app_version="8.4",
+                               lang_code="en",
+                               system_lang_code="en-US")
+    return tg_client
+
