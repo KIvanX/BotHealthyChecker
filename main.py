@@ -72,8 +72,13 @@ async def add_bot(call: types.CallbackQuery, state: FSMContext):
 @dp.message(F.text[0] != '/', BotStates.bot_username)
 async def save_new_bot(message: types.Message):
     username = message.text.replace('@', '').replace('https://t.me/', '')
-    bot_info = await get_bot(username)
+    old = next((b for b in users[str(message.chat.id)]['bots'] if b['username'] == username), None)
+    if old:
+        await message.delete()
+        await message.answer(f'❕ Этот бот уже добавлен', reply_markup=ok_button_keyboard())
+        return 0
 
+    bot_info = await get_bot(username)
     if bot_info is None:
         await message.delete()
         await message.answer(f'🤷 Бот <b>{username}</b> не найден, '
