@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import os
-import time
 from datetime import datetime
 
 from aiogram import types, F
@@ -95,7 +94,7 @@ async def save_new_bot(message: types.Message):
         return 0
 
     users[str(message.chat.id)]['bots'].append({'id': bot_info.id, 'username': username, 'name': bot_info.first_name,
-                                                'status': 'start', 'period': answer['period']})
+                                                'status': 'start', 'period': 10})
     save_users(users)
 
     await start(message)
