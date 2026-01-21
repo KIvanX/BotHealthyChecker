@@ -11,13 +11,14 @@ from core.utils import restart_tg_client, save_users
 async def checker():
     await asyncio.sleep(10)
     while True:
+        bots_answers = {}
         for user_id in users:
             for user_bot in users[user_id].get('bots', []):
                 try:
                     if user_bot['status'] == 'stop' or user_bot.get('last_check', 0) > time.time() - user_bot['period'] * 60:
                         continue
 
-                    answer = await ping_bot(user_bot['username'])
+                    answer = bots_answers.get(user_bot['username']) or await ping_bot(user_bot['username'])
                     if answer['status'] != 'ok':
                         logging.error(f'Error bot ping status: {answer}')
                         if answer.get('error', '').startswith('A wait of'):
@@ -30,7 +31,8 @@ async def checker():
 
                     user_bot['last_check'] = time.time()
                     save_users(users)
-                    await asyncio.sleep(1 + random.random() * 2)
+                    await asyncio.sleep(random.random())
+                    bots_answers[user_bot['username']] = answer
                 except Exception as e:
                     logging.error(e, exc_info=True)
 
