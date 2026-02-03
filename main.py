@@ -61,17 +61,6 @@ async def start(data):
                        reply_markup=keyboard.as_markup())
 
 
-@dp.message(F.entities)
-async def got_text(message: types.Message):
-    text = 'Премиум эмодзи:\n'
-
-    for i, entity in enumerate(message.entities):
-        text += f'<tg-emoji emoji-id="{entity.custom_emoji_id}">👍</tg-emoji> - <code>{entity.custom_emoji_id}</code>\n'
-    text += '\nHTML текст:\n<code>' + html.escape(message.html_text) + '</code>'
-
-    await message.answer(text)
-
-
 @dp.callback_query(F.data == 'add_bot')
 async def add_bot(call: types.CallbackQuery, state: FSMContext):
     keyboard = InlineKeyboardBuilder()
@@ -216,6 +205,17 @@ async def switch_status_bot(call: types.CallbackQuery, state: FSMContext):
 
     await call.answer('✅ Готово')
     await bot_menu(call, state)
+
+
+@dp.message(F.entities)
+async def got_text(message: types.Message):
+    text = 'Премиум эмодзи:\n'
+
+    for i, entity in enumerate(message.entities):
+        text += f'<tg-emoji emoji-id="{entity.custom_emoji_id}">👍</tg-emoji> - <code>{entity.custom_emoji_id}</code>\n'
+    text += '\nHTML текст:\n<code>' + html.escape(message.html_text) + '</code>'
+
+    await message.answer(text)
 
 
 async def main():
