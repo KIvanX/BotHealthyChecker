@@ -15,7 +15,7 @@ async def get_bot(username: str):
         return None
 
 
-async def ping_bot(username: str, timeout=10):
+async def ping_bot(username: str, timeout=30):
     bot = await get_bot(username)
 
     response_event = asyncio.Event()
