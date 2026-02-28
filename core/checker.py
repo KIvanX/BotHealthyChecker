@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import random
+import subprocess
 import time
 
 from core.config import users, bot, tg_client
@@ -28,6 +29,9 @@ async def checker():
                         await bot.send_message(chat_id=user_id,
                                                text=f'❗️ Бот <a href="https://t.me/{user_bot["username"]}">'
                                                     f'{user_bot['name']}</a> перестал отвечать на команду /start')
+
+                        if user_bot['username'] == 'personal_reminding_bot':
+                            subprocess.run(["pm2", "restart", "reminder"])
 
                     user_bot['last_check'] = time.time()
                     save_users(users)
