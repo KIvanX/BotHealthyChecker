@@ -26,12 +26,12 @@ async def checker():
                             await restart_tg_client(tg_client)
                             continue
 
-                        await bot.send_message(chat_id=user_id,
-                                               text=f'❗️ Бот <a href="https://t.me/{user_bot["username"]}">'
-                                                    f'{user_bot['name']}</a> перестал отвечать на команду /start')
-
                         if user_bot['username'] == 'personal_reminding_bot':
                             subprocess.run(["pm2", "restart", "reminder"])
+                        else:
+                            await bot.send_message(chat_id=user_id,
+                                                   text=f'❗️ Бот <a href="https://t.me/{user_bot["username"]}">'
+                                                        f'{user_bot['name']}</a> перестал отвечать на команду /start')
 
                     user_bot['last_check'] = time.time()
                     save_users(users)
