@@ -40,9 +40,11 @@ async def get_logs(message: types.Message):
 
 @dp.callback_query(F.data == 'start')
 @dp.message(Command('start'))
-async def start(data):
+async def start(data, state: FSMContext):
     message: types.Message = data.message if isinstance(data, types.CallbackQuery) else data
     keyboard = InlineKeyboardBuilder()
+    await state.clear()
+
     if str(message.chat.id) not in users:
         users[str(message.chat.id)] = {'username': message.chat.username, 'bots': []}
         save_users(users)
@@ -72,7 +74,7 @@ async def add_bot(call: types.CallbackQuery, state: FSMContext):
 
 
 @dp.message(F.text[0] != '/', BotStates.bot_username)
-async def save_new_bot(message: types.Message):
+async def save_new_bot(message: types.Message, state: FSMContext):
     username = message.text.replace('@', '').replace('https://t.me/', '')
     old = next((b for b in users[str(message.chat.id)]['bots'] if b['username'] == username), None)
     if old:
@@ -104,7 +106,7 @@ async def save_new_bot(message: types.Message):
                                                 'status': 'start', 'period': 10})
     save_users(users)
 
-    await start(message)
+    await start(message, state)
 
 
 @dp.callback_query(F.data.startswith('bot_'))
@@ -192,7 +194,7 @@ async def delete_bot(call: types.CallbackQuery, state: FSMContext):
     save_users(users)
 
     await call.answer('🗑 Бот удален')
-    await start(call)
+    await start(call, state)
 
 
 @dp.callback_query(F.data == 'switch_status_bot')
