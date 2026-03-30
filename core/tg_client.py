@@ -17,6 +17,12 @@ async def get_bot(username: str):
 
 async def ping_bot(username: str, timeout=30):
     bot = await get_bot(username)
+    if not bot:
+        return {
+            "status": "error",
+            "response_time": None,
+            "error": 'Bot not found',
+        }
 
     response_event = asyncio.Event()
     response_message = {}
