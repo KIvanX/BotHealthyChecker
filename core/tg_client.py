@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import time
 
 from telethon import events
@@ -9,9 +10,12 @@ from core.config import tg_client
 
 async def get_bot(username: str):
     try:
+        print(username)
         chat = await tg_client.get_entity(username)
-        return chat if isinstance(chat, types.User) else False
-    except:
+        print(chat)
+        return chat
+    except Exception as e:
+        logging.error(e, exc_info=True)
         return None
 
 
