@@ -3,7 +3,6 @@ import logging
 import time
 
 from telethon import events
-from telethon.tl import types
 
 from core.config import tg_client
 

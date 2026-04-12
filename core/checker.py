@@ -12,6 +12,9 @@ from core.utils import restart_tg_client, save_users
 async def checker():
     await asyncio.sleep(10)
     while True:
+        if not tg_client.is_connected():
+            await tg_client.connect()
+
         bots_answers = {}
         for user_id in users:
             for user_bot in users[user_id].get('bots', []):
